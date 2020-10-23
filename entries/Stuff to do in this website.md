@@ -1,0 +1,5 @@
+- figure out why it somehow adds extra spaces in between lines DONE
+- make something be able to be bold in a list at the same time
+- make it look better
+- maybe add some more features of to_html
+- also maybe add a / feature in to_html
