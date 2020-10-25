@@ -50,9 +50,10 @@ def to_html(text):
     lists_b = re.compile("-")
     bold = re.compile("(\*\*.+?\*\*)")
     link = re.compile("(\[.+?\]\(.+?\))")
-   
+
     # split text into individual lines
     line_split = text.splitlines()
+    length = len(line_split)
 
     # define a function to deal with headers (h1 - h6)
     def header(size, text, name):
@@ -100,24 +101,45 @@ def to_html(text):
     # for html lists
     i = 0
     list_list = []
-    while i < len(line_split):  # loops through entire line_split
+    while i < length:  # loops through entire line_split
         if lists_a.match(line_split[i]) or lists_b.match(line_split[i]): #checks for the beggining list item
             list_list.append("<ul>")  # adds opening <ul> tag
             line_split[i] = line_split[i][1:] # deletes the star at the beginning
             list_list.append(f"<li>{line_split[i]}</li>")  # adds first list item
             i += 1
-            if i < len(line_split):
+            if i < length:
                 while lists_a.match(line_split[i]) or lists_b.match(line_split[i]): # checks for each new list item until the list is over
                     line_split[i] = line_split[i][1:] # deletes the star at the beginning
                     list_list.append(f"<li>{line_split[i]}</li>")# adds each new list item to list list
                     i += 1
-                    if i >= len(line_split): #break condition just in case
+                    if i >= length: #break condition just in case
                         break
             list_list.append("</ul>") # adds closing </ul> tag once list is over
-        else:  # if the line is not part of markdown list, 
+        else:  # if the line is not part of markdown list 
             list_list.append(f"{line_split[i]}\n")  # adds a newline character (\n) at the end of every line so it looks better when converted to HTML
             i += 1
     line_split = list_list
+    
+    length = len(line_split)  # redefines length to account for the added <ul> tags because of the list
+    line_split[0] = '<p>' + line_split[0]  # adds <p> tag to very first line
+    i = 0
+    while i < length:  # loops through the lines
+        if (i + 1) < length:  # to avoid i being greater than the length of the list
+            if line_split[i + 1] == "\n" and line_split[i] != "\n":  # if the next line is a newline, finish the paragraph
+                line_split[i] += '</p>'
+        if (i - 1) >= 0:  # to avoid i being smaller than 0
+            if line_split[i - 1]  == "\n" and line_split[i] != "\n":  # if the previous line is a newline, start a new paragraph
+                line_split[i] = '<p>' + line_split[i]
+        i += 1
+    line_split[length - 1] += '</p>'  # close the final paragraph
+    
+    # this small loop just changes newline characters to blank strings if there is no text in the previous or next lines
+    # this way, there is not too much space when the content is converted to HTML
+    i = 0
+    for line in line_split:  
+        if line == "\n" and line_split[i + 1] != "\n" and line_split[i - 1] != "\n":
+            line_split[i] = ""
+        i += 1
     
     return line_split
     
