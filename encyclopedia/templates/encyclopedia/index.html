@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block body %}
-    <h1>All Pages</h1>
-
+	<h1>Welcome to Wiki!</h1>
+	<br>
+    <h3>All Pages</h3>
     <ul>
         {% for entry in entries %}
             <li><a href = "{% url 'wiki:page' entry %}">{{ entry }}</a></li>

@@ -15,7 +15,6 @@
                 <form action="{% url 'wiki:search_results' %}" method="post">
 					{% csrf_token %}
 					{{ search_form }}
-                    <!-- input class="search" type="text" name="q" placeholder="Search Encyclopedia" action="" -->
                 </form>
                 <div>
                     <a href="{% url 'wiki:index' %}">Home</a>

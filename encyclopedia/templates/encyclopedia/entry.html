@@ -6,16 +6,11 @@
 
 {% block body %}
 
-<a style="text-align:right;" href="{% url 'wiki:edit_page' pagename=page_name %}">Edit {{ page_name }}</a>
+<a style="text-align:right;" type="button" class="btn btn-primary" href="{% url 'wiki:edit_page' pagename=page_name %}">Edit Page '{{ page_name|upper }}'</a>
 
-
-
-<p></p>
 {% for line in entry %}
 	{{ line|safe|linebreaksbr }}
 {% endfor %}
-<br>
-{{ entry }}
 
 
 {% endblock %}
