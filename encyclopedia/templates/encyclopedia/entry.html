@@ -7,50 +7,15 @@
 {% block body %}
 
 <a style="text-align:right;" href="{% url 'wiki:edit_page' pagename=page_name %}">Edit {{ page_name }}</a>
-<p>
-{% for line, attribute in entry %}
-	{% if attribute == 'close_open_p' %}
-		</p><p>
-	{% elif attribute == 'close_p' %}
-		</p>
-	{% elif attribute == 'open_p' %}
-		<p>
-	{% elif attribute == 'h1' %}
-		<h1>{{ line }}</h1>
-	{% elif attribute == 'h2' %}
-		<h2>{{ line }}</h2>
-	{% elif attribute == 'h3' %}
-		<h3>{{ line }}</h3>
-	{% elif attribute == 'h4' %}
-		<h4>{{ line }}</h4>
-	{% elif attribute == 'h5' %}
-		<h5>{{ line }}</h5>
-	{% elif attribute == 'h6' %}
-		<h6>{{ line }}</h6>
-	{% elif attribute == 'list' %}
-		<ul>
-			{% for li in line %}
-				<li>{{ li }}</li>
-			{% endfor %}
-		</ul>
-	{% elif attribute == 'bold_and_link' %}
-		
-		{% for tuple in line %}
-			{% if tuple.1 == 'bold' %}
-				<b>{{ tuple.0 }}</b>
-			{% elif tuple.1 == 'link' %}
-				<a href = "{% url 'wiki:page' tuple.0.1 %}">{{ tuple.0.0 }}</a>
-			{% else %}
-				{{ tuple.0 }}
-			{% endif %}
-		{% endfor %}
-		<br>
-	{% else %}
-		{{line}} <br>
-	{% endif %}
-{% endfor %}
+
+
 
 <p></p>
-<! {{ entry }} >
+{% for line in entry %}
+	{{ line|safe|linebreaksbr }}
+{% endfor %}
+<br>
+{{ entry }}
+
 
 {% endblock %}

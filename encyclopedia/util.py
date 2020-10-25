@@ -38,8 +38,7 @@ def get_entry(title):
 
 
 def to_html(text): #I have to find a way to make things work on different lines (at least bold and list)
-    line_split = text.splitlines()
-    markdown_dict = {}
+
     h6 = re.compile("#{6,6}")
     h5 = re.compile("#{5,5}")
     h4 = re.compile("#{4,4}")
@@ -50,29 +49,80 @@ def to_html(text): #I have to find a way to make things work on different lines 
     lists_b = re.compile("-")
     bold = re.compile("(\*\*.+?\*\*)")
     link = re.compile("(\[.+?\]\(.+?\))")
+   
+    line_split = text.splitlines()
+
+    def header(size, text, name):
+        new_list = []
+        for line in line_split:
+            if size.match(line):
+                line = size.sub(f'<{str(name)}>', line)
+                line += f'</{str(name)}>'
+            new_list.append(line)
+        return new_list
+        
+    def bold_or_link(attribute, text, name):
+        new_line_list = []
+        for line in text:
+            if attribute.search(line):
+                attribute_split_list = attribute.split(line)
+                new_attribute_list = []
+                for value in attribute_split_list:
+                    if attribute.match(value):
+                        if name == "bold":
+                            value = value[2:(len(value) - 2)] # deletes the **
+                            value = f"<b>{value}</b>"
+                        elif name == "link":
+                            link_split_list = re.split("\]\(", value)
+                            text = link_split_list[0][1:]
+                            url = link_split_list[1]
+                            url = url[:(len(url) - 1)]
+                            value = f'<a href="{url}">{text}</a>'
+                    new_attribute_list.append(value)
+                line = "".join(new_attribute_list)
+            new_line_list.append(line)
+        return new_line_list
+        
+    line_split = header(size=h6, text=line_split, name="h6")
+    line_split = header(size=h5, text=line_split, name="h5")
+    line_split = header(size=h4, text=line_split, name="h4")
+    line_split = header(size=h3, text=line_split, name="h3")
+    line_split = header(size=h2, text=line_split, name="h2")
+    line_split = header(size=h1, text=line_split, name="h1")
+    line_split = bold_or_link(attribute=bold, text=line_split, name="bold")
+    line_split = bold_or_link(attribute=link, text=line_split, name="link")
     
-    i = 0 
-    def header(size, text, name, iterator):
-        if size.match(text):
-            text = size.sub('', text)
-            markdown_dict[text] = str(name)
-            iterator += 1
-        return iterator
-            
+    i = 0
+    list_list = []
+    while i < len(line_split):
+        if lists_a.match(line_split[i]) or lists_b.match(line_split[i]): #checks for the beggining list item
+            list_list.append("<ul>")
+            line_split[i] = line_split[i][1:] # deletes the star at the beginning
+            list_list.append(f"<li>{line_split[i]}</li>")
+            i += 1
+            if i < len(line_split):
+                while lists_a.match(line_split[i]) or lists_b.match(line_split[i]): # checks for each new list item until the list is over
+                    line_split[i] = line_split[i][1:] # deletes the star at the beginning
+                    list_list.append(f"<li>{line_split[i]}</li>")# adds each new list item to list list
+                    i += 1
+                    if i >= len(line_split): #break condition just in case
+                        break
+            list_list.append("</ul>") # converts to tuple
+        else:
+            list_list.append(f"{line_split[i]}\n")
+            i += 1
+    line_split = list_list
+    
+    
+        
+        
+    
+        
+    return line_split
+    """     
     length = len(line_split)
     
     while i < length:  
-    
-        if line_split[i] == "":
-            if line_split[i+1] and line_split[i-1] and (i+1) < length and (i-1) >= 0:
-                markdown_dict[line_split[i]] = 'close_open_p'
-                i += 1
-            elif line_split[i+1] and (i+1) < length:
-                markdown_dict[line_split[i]] = 'open_p'
-                i += 1
-            elif line_split[i-1] and (i-1) >= 0:
-                markdown_dict[line_split[i]] = 'close_p'  
-                i += 1
     
         if h6.match(line_split[i]):
             i = header(h6, line_split[i], 'h6', i)
@@ -84,15 +134,13 @@ def to_html(text): #I have to find a way to make things work on different lines 
             i = header(h3, line_split[i], 'h3', i)
         elif h2.match(line_split[i]):
             i = header(h2, line_split[i], 'h2', i)
-        elif h1.match(line_split[i]):
+        elif h1.match(line_split[i]):  
             i = header(h1, line_split[i], 'h1', i)
         
-        if i >= length:  
-            break
+        #if i >= length:  
+            #break
         
-      
-        
-        if bold.search(line_split[i]) or link.search(line_split[i]):
+        elif bold.search(line_split[i]) or link.search(line_split[i]):
             line_split_bold_link = re.split("(\*\*.+?\*\*|\[.+?\]\(.+?\))", line_split[i])# split line by bold and link sections including them
             bold_link_dict = {}   # create empty dictionary
             for value in line_split_bold_link: # iterate over each string and find out whether it needs to be bolded or not
@@ -138,6 +186,7 @@ def to_html(text): #I have to find a way to make things work on different lines 
             lists_list = tuple(lists_list) # converts to tuple
             markdown_dict[lists_list] = 'list'   # adds final tuple containing all bullet points to markdown_dict
                 #continue - i am not sure if I need this or not
+       
         
         else:
             if line_split[i]:
@@ -153,24 +202,7 @@ def to_html(text): #I have to find a way to make things work on different lines 
                 elif line_split[i-1] and (i-1) >= 0:
                     markdown_dict[line_split[i]] = 'close_p'  
                     i += 1
-            
+           
     
     return markdown_dict  
-
-"""
-I am going to keep this function just in case, delete it before turning in:
-
-
-def search_like(search_query, item_to_be_compared_to):
-    i = 0
-    counter_list = []
-    smaller_string = min(len(search_query), len(item_to_be_compared_to))
-    while i < smaller_string:
-        if search_query[i] == item_to_be_compared_to[i]:
-            counter_list.append(1)
-        i += 1
-    if len(counter_list) == smaller_string:
-        return True
-    else:
-        return False
-"""
+    """

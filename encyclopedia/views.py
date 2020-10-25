@@ -39,7 +39,7 @@ def page(request, page_name):
     else: 
         entry = util.to_html(entry) #convert from markdown to html
         return render(request, "encyclopedia/entry.html", {
-            "entry": entry.items(), "page_name": page_name
+            "entry": entry, "page_name": page_name,
             })
             
 def random_page(request):
@@ -113,19 +113,6 @@ def edit_page(request, pagename):
                 "page_name": pagename    #NewPageNameForm(placeholder=pagename)
             })
     else:
-        """
-        form_name = NewPageNameForm(request.POST)
-        if form_name.is_valid():
-            name = form_name.cleaned_data["name"]
-        else:
-            return render(request, "encyclopedia/edit_page.html", {
-                "form": NewPageNameForm(placeholder=form_name)
-            })
-        if util.get_entry(name) and name != pagename:
-            return render(request, "encyclopedia/error.html", {
-                "message": "Error. A page with that name already exists."
-            })
-        """
         form_content = NewPageForm(request.POST)
         if form_content.is_valid():
             page = form_content.cleaned_data["page"]
